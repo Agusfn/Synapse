@@ -29,7 +29,7 @@ public class Config
 
     public bool ShowEliminated { get; set; } = true;
 
-    public string Url { get; set; } = "https://synapse.totalbs.dev/api/v1/directory";
+    public string Url { get; set; } = "https://26.190.26.174:5001/api/v1/directory";
 
     public virtual void Changed()
     {

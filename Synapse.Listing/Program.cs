@@ -1,6 +1,16 @@
 using Synapse.Listing.Services;
+using System.Net;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Listen(IPAddress.Any, 5001, listenOptions =>
+    {
+        listenOptions.UseHttps("Certs/cert.pfx", "20596");
+    });
+});
 
 // Add services to the container.
 
