@@ -24,6 +24,8 @@ public record LeaderboardCell
 {
     public int Rank { get; init; }
 
+    public string PlayerId { get; init; } = string.Empty;
+
     public string PlayerName { get; init; } = string.Empty;
 
     public int Score { get; init; }

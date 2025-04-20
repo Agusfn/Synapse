@@ -389,21 +389,16 @@ public class LeaderboardService : ILeaderboardService
         for (int index = 0; index < mapCount; index++)
         {
             var mapSortedScores = scoresData[division][index];
-            var divisionCache = cache[division];
 
-            ImmutableList<LeaderboardCell> scores = divisionCache[index] ??= Enumerable
-                .Range(0, Math.Min(12, mapSortedScores.Count))
-                .Select(n =>
+            ImmutableList<LeaderboardCell> scores = mapSortedScores
+                .Select((score, n) => new LeaderboardCell
                 {
-                    var score = mapSortedScores[n];
-                    return new LeaderboardCell
-                    {
-                        Rank = n,
-                        PlayerName = score.Username,
-                        Percentage = score.Percentage,
-                        Score = score.Score,
-                        Color = _tournamentService.GetColor(division, index, score.Id)
-                    };
+                    Rank = n,
+                    PlayerId = score.Id,
+                    PlayerName = score.Username,
+                    Percentage = score.Percentage,
+                    Score = score.Score,
+                    Color = _tournamentService.GetColor(division, index, score.Id)
                 })
                 .ToImmutableList();
 
