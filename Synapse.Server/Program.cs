@@ -30,6 +30,7 @@ using IHost host = Host
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IClient, ServerClient>();
             services.AddSingleton<ITimeService, TimeService>();
+            services.AddSingleton<IHttpApiService, HttpApiService>();
 
             services.AddSingleton<Stage, IntroStage>();
             services.AddSingleton<Stage, PlayStage>();
@@ -66,6 +67,10 @@ using IHost host = Host
 
 IListenerService listener = host.Services.GetService<IListenerService>() ?? throw new InvalidOperationException();
 _ = listener.RunAsync();
+
+IHttpApiService apiService = host.Services.GetRequiredService<IHttpApiService>();
+_ = apiService.RunAsync(); // no bloquea, se ejecuta en paralelo
+
 
 ICommandService command = host.Services.GetService<ICommandService>() ?? throw new InvalidOperationException();
 command.Run(); // blocks

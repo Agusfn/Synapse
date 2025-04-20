@@ -26,6 +26,8 @@ public interface ILeaderboardService
     public Task SubmitTournamentScores(int index);
 
     public bool TryGetScore(int index, IClient serverClient, out SavedScore score);
+
+    public List<LeaderboardScores> GetAllLeaderboardsScores(int division, bool showEliminated);
 }
 
 public class LeaderboardService : ILeaderboardService
@@ -294,6 +296,7 @@ public class LeaderboardService : ILeaderboardService
             JsonSerializer.Serialize(leaderboardScores, JsonUtils.Settings));
     }
 
+
     private void SubmitScore(IClient client, int division, int index, int score, float percentage)
     {
         try
@@ -372,5 +375,49 @@ public class LeaderboardService : ILeaderboardService
         {
             _log.LogError(e, "Exception while submitting score for [{Client}]", client);
         }
+    }
+
+    public List<LeaderboardScores> GetAllLeaderboardsScores(int division, bool showEliminated)
+    {
+        var allScores = new List<LeaderboardScores>();
+
+        var scoresData = showEliminated ? _sortedAllScores : _sortedScores;
+        var cache = showEliminated ? _cachedAllScores : _cachedScores;
+
+        int mapCount = _mapService.MapCount;
+
+        for (int index = 0; index < mapCount; index++)
+        {
+            var mapSortedScores = scoresData[division][index];
+            var divisionCache = cache[division];
+
+            ImmutableList<LeaderboardCell> scores = divisionCache[index] ??= Enumerable
+                .Range(0, Math.Min(12, mapSortedScores.Count))
+                .Select(n =>
+                {
+                    var score = mapSortedScores[n];
+                    return new LeaderboardCell
+                    {
+                        Rank = n,
+                        PlayerName = score.Username,
+                        Percentage = score.Percentage,
+                        Score = score.Score,
+                        Color = _tournamentService.GetColor(division, index, score.Id)
+                    };
+                })
+                .ToImmutableList();
+
+            allScores.Add(new LeaderboardScores
+            {
+                Index = index,
+                Title = _mapService.Maps[index].Name,
+                PlayerScoreIndex = -1, // no hay jugador personalizado
+                Scores = scores,
+                AliveCount = _sortedScores[division][index].Count,
+                ScoreCount = _sortedAllScores[division][index].Count
+            });
+        }
+
+        return allScores;
     }
 }
